@@ -3,13 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>اختبار التثقيف الصحي</title>
+    <title>الصحة المجتمعية</title>
     <style>
         :root {
             --primary: #3498db;
             --secondary: #2c3e50;
             --success: #2ecc71;
             --danger: #e74c3c;
+            --warning: #f39c12;
+            --purple: #8e44ad;
             --bg: #f4f7f6;
             --card-bg: #ffffff;
         }
@@ -52,10 +54,12 @@
             padding: 40px 60px;
             border-radius: 25px;
             opacity: 0;
+            text-align: center;
+            min-width: 300px;
         }
 
         #central-feedback.animate {
-            animation: popPulseFade 1.6s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+            animation: popPulseFade 2.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
         }
 
         #central-feedback .cf-icon {
@@ -67,7 +71,7 @@
         #central-feedback .cf-text {
             font-size: 28px;
             font-weight: bold;
-            text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            text-shadow: 0 2px 4px rgba(0,0,0,0.05);
         }
 
         .correct-theme { 
@@ -84,10 +88,10 @@
 
         @keyframes popPulseFade {
             0% { transform: translate(-50%, -50%) scale(0); opacity: 0; }
-            15% { transform: translate(-50%, -50%) scale(1.2); opacity: 1; }
-            30% { transform: translate(-50%, -50%) scale(0.95); opacity: 1; }
-            45% { transform: translate(-50%, -50%) scale(1.05); opacity: 1; }
-            60% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+            10% { transform: translate(-50%, -50%) scale(1.1); opacity: 1; }
+            20% { transform: translate(-50%, -50%) scale(0.95); opacity: 1; }
+            30% { transform: translate(-50%, -50%) scale(1.05); opacity: 1; }
+            40% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
             80% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
             100% { transform: translate(-50%, -50%) scale(1.5); opacity: 0; }
         }
@@ -261,6 +265,7 @@
             cursor: pointer;
             font-weight: bold;
             transition: all 0.3s ease;
+            margin: 5px;
         }
 
         .btn:hover {
@@ -276,6 +281,9 @@
         
         .btn-success { background-color: var(--success); }
         .btn-success:hover { background-color: #27ae60; }
+
+        .btn-warning { background-color: var(--warning); }
+        .btn-warning:hover { background-color: #d68910; }
 
         /* Results Screen */
         #result-screen {
@@ -297,6 +305,58 @@
             margin: 0 auto 20px;
             color: var(--secondary);
             box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        /* Prayer Animation Box */
+        .prayer-box {
+            background: linear-gradient(135deg, var(--purple), #9b59b6);
+            color: white;
+            padding: 25px;
+            border-radius: 15px;
+            margin: 30px auto;
+            max-width: 600px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 20px;
+            opacity: 0;
+            transform: translateY(50px) scale(0.9);
+            box-shadow: 0 10px 30px rgba(142, 68, 173, 0.4);
+            border: 2px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .prayer-box.show {
+            animation: 
+                slideUpPrayer 1s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards, 
+                pulseGlowPrayer 2s infinite alternate 1s;
+        }
+
+        .prayer-icon {
+            font-size: 3em;
+            animation: floatHands 2s infinite ease-in-out;
+            text-shadow: 0 4px 10px rgba(0,0,0,0.2);
+        }
+
+        .prayer-text {
+            font-size: 1.3em;
+            font-weight: bold;
+            line-height: 1.5;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.2);
+            text-align: right;
+        }
+
+        @keyframes slideUpPrayer {
+            to { opacity: 1; transform: translateY(0) scale(1); }
+        }
+
+        @keyframes pulseGlowPrayer {
+            from { box-shadow: 0 5px 15px rgba(142, 68, 173, 0.4); transform: scale(1); }
+            to { box-shadow: 0 20px 40px rgba(155, 89, 182, 0.8); transform: scale(1.02); }
+        }
+
+        @keyframes floatHands {
+            0%, 100% { transform: translateY(0) rotate(0deg); }
+            50% { transform: translateY(-8px) rotate(5deg); }
         }
 
         .footer-attribution {
@@ -330,7 +390,7 @@
     </div>
 
     <header>
-        <h1>اختبار التثقيف الصحي</h1>
+        <h1>الصحة المجتمعية</h1>
         <p>شعبة 23</p>
     </header>
 
@@ -392,9 +452,20 @@
             <div class="score-circle" id="score-display">0%</div>
             <h3 id="score-text">أجبت بشكل صحيح على 0 من 26</h3>
             <p id="time-taken-text"></p>
-            <div style="margin-top: 30px;">
-                <button class="btn" onclick="reviewAnswers()">مراجعة كامل الإجابات</button>
-                <button class="btn btn-success" onclick="location.reload()">إعادة الاختبار</button>
+            
+            <!-- مؤثرات الدعاء المتحركة -->
+            <div class="prayer-box" id="prayer-box">
+                <div class="prayer-icon">🤲</div>
+                <div class="prayer-text">
+                    فضلاً وليس أمراً،<br>
+                    نسألكم الدعاء لمصمم هذا المحتوى ووالديه<br>بالمغفرة والتوفيق والصحة والعافية
+                </div>
+            </div>
+
+            <div style="margin-top: 30px; display: flex; flex-wrap: wrap; justify-content: center;">
+                <button class="btn" onclick="reviewAnswers()">مراجعة الإجابات</button>
+                <button class="btn btn-warning" id="retake-wrong-btn" onclick="retakeIncorrect()">إعادة الأسئلة الخاطئة</button>
+                <button class="btn btn-success" onclick="location.reload()">إعادة اختبار جديد</button>
             </div>
         </div>
 
@@ -491,7 +562,7 @@
         });
 
         // Show Central Celebration
-        function showCentralFeedback(isCorrect) {
+        function showCentralFeedback(isCorrect, correctText = "") {
             const feedbackDiv = document.getElementById('central-feedback');
             const iconDiv = document.getElementById('cf-icon');
             const textDiv = document.getElementById('cf-text');
@@ -503,44 +574,70 @@
             if (isCorrect) {
                 feedbackDiv.className = 'correct-theme animate';
                 iconDiv.textContent = '✔️';
-                textDiv.textContent = 'إجابة رائعة!';
+                textDiv.innerHTML = 'إجابة رائعة!';
                 // Massive sparks burst from center
                 createSparks(window.innerWidth / 2, window.innerHeight / 2, 40);
             } else {
                 feedbackDiv.className = 'wrong-theme animate';
                 iconDiv.textContent = '❌';
-                textDiv.textContent = 'إجابة خاطئة!';
+                // إظهار نص الإجابة الصحيحة
+                textDiv.innerHTML = `إجابة خاطئة!<br><div style="font-size: 0.6em; margin-top:10px; color: #555; background: #eee; padding: 5px; border-radius: 5px;">الصحيح: ${correctText}</div>`;
             }
 
             // Cleanup class after animation ends
             setTimeout(() => {
                 feedbackDiv.classList.remove('animate');
-            }, 1600);
+            }, 2500); 
         }
 
         // Initialize Quiz
-        function startQuiz() {
-            const doShuffle = document.getElementById('shuffle-mode').checked;
-            currentMode = document.getElementById('display-mode').value;
-            isImmediateFeedback = document.getElementById('immediate-feedback').checked;
-            timeLimit = parseInt(document.getElementById('timer-mode').value) * 60;
-            
-            // Deep copy and prepare
-            questions = JSON.parse(JSON.stringify(rawQuestions));
-            
-            if (doShuffle) {
-                shuffleArray(questions);
-                questions.forEach(q => shuffleArray(q.opts));
+        function startQuiz(retakeOnly = false) {
+            if (!retakeOnly) {
+                const doShuffle = document.getElementById('shuffle-mode').checked;
+                currentMode = document.getElementById('display-mode').value;
+                isImmediateFeedback = document.getElementById('immediate-feedback').checked;
+                timeLimit = parseInt(document.getElementById('timer-mode').value) * 60;
+                
+                // Deep copy and prepare
+                questions = JSON.parse(JSON.stringify(rawQuestions));
+                
+                if (doShuffle) {
+                    shuffleArray(questions);
+                    questions.forEach(q => shuffleArray(q.opts));
+                }
+            } else {
+                // في حالة الإعادة، الإجابة المباشرة تصبح مفعلة إجبارياً لضمان التنبيه
+                isImmediateFeedback = true; 
             }
             
             userAnswers = new Array(questions.length).fill(null);
+            currentIndex = 0;
+            secondsElapsed = 0;
+            
+            // إخفاء صندوق الدعاء عند إعادة الاختبار
+            document.getElementById('prayer-box').classList.remove('show');
             
             document.getElementById('setup-screen').style.display = 'none';
+            document.getElementById('result-screen').style.display = 'none';
             document.getElementById('quiz-screen').style.display = 'block';
             
             buildQuizDOM();
+            
+            clearInterval(timerInterval);
             startTimer();
             updateUI();
+        }
+
+        // إعادة الأسئلة الخاطئة فقط
+        function retakeIncorrect() {
+            // تصفية الأسئلة لتشمل الخاطئة أو التي لم يتم الإجابة عليها
+            questions = questions.filter((q, idx) => {
+                let ans = userAnswers[idx];
+                return ans === null || !q.opts[ans].c;
+            });
+            
+            // البدء في وضع الإعادة
+            startQuiz(true);
         }
 
         function buildQuizDOM() {
@@ -595,9 +692,10 @@
                 ul.style.pointerEvents = 'none'; // Disable further clicks
                 
                 const isCorrect = questions[qIndex].opts[optIndex].c;
+                const correctOpt = questions[qIndex].opts.find(o => o.c).t; // استخراج النص الصحيح
                 
-                // Trigger Central Pop Animation
-                showCentralFeedback(isCorrect);
+                // Trigger Central Pop Animation with Correct Text
+                showCentralFeedback(isCorrect, correctOpt);
 
                 if (isCorrect) {
                     liElement.classList.add('correct-ans');
@@ -681,8 +779,22 @@
             document.getElementById('score-display').textContent = `${percentage}%`;
             document.getElementById('score-text').textContent = `أجبت بشكل صحيح على ${score} من ${questions.length}`;
             
+            // إظهار أو إخفاء زر إعادة الأخطاء
+            const retakeBtn = document.getElementById('retake-wrong-btn');
+            if (score === questions.length) {
+                retakeBtn.style.display = 'none';
+            } else {
+                retakeBtn.style.display = 'inline-block';
+            }
+            
             let timeStr = timeLimit > 0 ? formatTime(secondsElapsed) : formatTime(secondsElapsed);
             document.getElementById('time-taken-text').textContent = `الوقت المستغرق: ${timeStr}`;
+
+            // إطلاق شلال من المؤثرات عند إنهاء الاختبار وتفعيل صندوق الدعاء
+            setTimeout(() => {
+                createSparks(window.innerWidth / 2, window.innerHeight / 2, 80);
+                document.getElementById('prayer-box').classList.add('show');
+            }, 300);
         }
 
         // Review Answers Mode
