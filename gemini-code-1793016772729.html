@@ -1,0 +1,724 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>اختبار التثقيف الصحي</title>
+    <style>
+        :root {
+            --primary: #3498db;
+            --secondary: #2c3e50;
+            --success: #2ecc71;
+            --danger: #e74c3c;
+            --bg: #f4f7f6;
+            --card-bg: #ffffff;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg);
+            color: var(--secondary);
+            margin: 0;
+            padding: 0;
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        /* Sparks Animation Effect */
+        .spark {
+            position: fixed;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 9999;
+            transition: transform 0.6s cubic-bezier(0, 0.9, 0.3, 1), opacity 0.6s ease-out;
+        }
+
+        /* Central Celebration Animation */
+        #central-feedback {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(0);
+            z-index: 10000;
+            pointer-events: none;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(5px);
+            padding: 40px 60px;
+            border-radius: 25px;
+            opacity: 0;
+        }
+
+        #central-feedback.animate {
+            animation: popPulseFade 1.6s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+        }
+
+        #central-feedback .cf-icon {
+            font-size: 80px;
+            margin-bottom: 15px;
+            line-height: 1;
+        }
+
+        #central-feedback .cf-text {
+            font-size: 28px;
+            font-weight: bold;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .correct-theme { 
+            color: var(--success); 
+            border: 4px solid var(--success);
+            box-shadow: 0 10px 40px rgba(46, 204, 113, 0.4);
+        }
+
+        .wrong-theme { 
+            color: var(--danger); 
+            border: 4px solid var(--danger);
+            box-shadow: 0 10px 40px rgba(231, 76, 60, 0.4);
+        }
+
+        @keyframes popPulseFade {
+            0% { transform: translate(-50%, -50%) scale(0); opacity: 0; }
+            15% { transform: translate(-50%, -50%) scale(1.2); opacity: 1; }
+            30% { transform: translate(-50%, -50%) scale(0.95); opacity: 1; }
+            45% { transform: translate(-50%, -50%) scale(1.05); opacity: 1; }
+            60% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+            80% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+            100% { transform: translate(-50%, -50%) scale(1.5); opacity: 0; }
+        }
+
+        header {
+            background-color: var(--primary);
+            color: white;
+            text-align: center;
+            padding: 20px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        header h1 {
+            margin: 0;
+            font-size: 1.8em;
+        }
+        
+        header p {
+            margin: 5px 0 0 0;
+            font-size: 1.1em;
+            opacity: 0.9;
+            font-weight: bold;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 30px auto;
+            padding: 0 20px;
+        }
+
+        /* Setup Screen */
+        .setup-card {
+            background: var(--card-bg);
+            border-radius: 12px;
+            padding: 30px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+            text-align: center;
+        }
+
+        .setup-options {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            max-width: 450px;
+            margin: 20px auto;
+        }
+
+        .setup-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: var(--bg);
+            padding: 10px 20px;
+            border-radius: 8px;
+        }
+
+        /* Quiz Screen */
+        #quiz-screen {
+            display: none;
+        }
+
+        .quiz-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: var(--card-bg);
+            padding: 15px 25px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            font-weight: bold;
+            font-size: 1.1em;
+        }
+
+        .timer {
+            color: var(--danger);
+            font-family: monospace;
+            font-size: 1.2em;
+        }
+
+        .question-card {
+            background-color: var(--card-bg);
+            border-radius: 12px;
+            padding: 25px;
+            margin-bottom: 20px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+            border-right: 6px solid var(--primary);
+            display: none;
+            animation: fadeIn 0.4s ease;
+        }
+
+        .question-card.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .question-text {
+            font-size: 1.2em;
+            font-weight: bold;
+            margin-bottom: 20px;
+        }
+
+        .options-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .option-item {
+            background-color: #fafafa;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 12px 20px;
+            margin-bottom: 10px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-size: 1.05em;
+            position: relative;
+        }
+
+        .option-item:hover {
+            background-color: #f0f8ff;
+            border-color: var(--primary);
+        }
+
+        .option-item.selected {
+            background-color: #e3f2fd;
+            border-color: var(--primary);
+            box-shadow: 0 0 8px rgba(52, 152, 219, 0.3);
+        }
+
+        /* Results & Review */
+        .option-item.correct-ans {
+            background-color: #e8f5e9 !important;
+            border-color: var(--success) !important;
+            color: #1b5e20;
+        }
+        
+        .option-item.wrong-ans {
+            background-color: #ffebee !important;
+            border-color: var(--danger) !important;
+            color: #b71c1c;
+        }
+
+        .feedback-badge {
+            float: left;
+            font-size: 0.9em;
+            font-weight: bold;
+            padding: 2px 8px;
+            border-radius: 4px;
+            background: rgba(255,255,255,0.7);
+        }
+
+        .controls {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 20px;
+        }
+
+        .btn {
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            font-size: 1em;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+
+        .btn:hover {
+            background-color: #2980b9;
+            transform: translateY(-2px);
+        }
+
+        .btn:disabled {
+            background-color: #bdc3c7;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .btn-success { background-color: var(--success); }
+        .btn-success:hover { background-color: #27ae60; }
+
+        /* Results Screen */
+        #result-screen {
+            display: none;
+            text-align: center;
+        }
+
+        .score-circle {
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            background: var(--card-bg);
+            border: 10px solid var(--primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.5em;
+            font-weight: bold;
+            margin: 0 auto 20px;
+            color: var(--secondary);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        .footer-attribution {
+            text-align: center;
+            padding: 30px;
+            color: #7f8c8d;
+            font-size: 0.9em;
+            font-weight: bold;
+            letter-spacing: 1px;
+        }
+        
+        .footer-attribution span {
+            color: var(--danger);
+        }
+
+        select, input[type="checkbox"] {
+            padding: 8px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+            cursor: pointer;
+        }
+
+    </style>
+</head>
+<body>
+
+    <!-- Central Celebration Div -->
+    <div id="central-feedback">
+        <div class="cf-icon" id="cf-icon">✔️</div>
+        <div class="cf-text" id="cf-text">إجابة رائعة!</div>
+    </div>
+
+    <header>
+        <h1>اختبار التثقيف الصحي</h1>
+        <p>شعبة 23</p>
+    </header>
+
+    <div class="container">
+        
+        <!-- Setup Screen -->
+        <div id="setup-screen" class="setup-card">
+            <h2>إعدادات الاختبار</h2>
+            <div class="setup-options">
+                <div class="setup-row">
+                    <label>طريقة العرض:</label>
+                    <select id="display-mode">
+                        <option value="single">سؤال واحد (Single)</option>
+                        <option value="list">قائمة كاملة (List)</option>
+                    </select>
+                </div>
+                <div class="setup-row">
+                    <label>إظهار الإجابة الصحيحة فوراً (مع المؤثرات):</label>
+                    <input type="checkbox" id="immediate-feedback" checked>
+                </div>
+                <div class="setup-row">
+                    <label>خلط الأسئلة والخيارات:</label>
+                    <input type="checkbox" id="shuffle-mode" checked>
+                </div>
+                <div class="setup-row">
+                    <label>تفعيل المؤقت (دقائق):</label>
+                    <select id="timer-mode">
+                        <option value="0">بدون مؤقت</option>
+                        <option value="10">10 دقائق</option>
+                        <option value="15">15 دقيقة</option>
+                        <option value="20">20 دقيقة</option>
+                    </select>
+                </div>
+            </div>
+            <button class="btn btn-success" style="margin-top: 20px; width: 200px;" onclick="startQuiz()">ابدأ الاختبار</button>
+        </div>
+
+        <!-- Quiz Screen -->
+        <div id="quiz-screen">
+            <div class="quiz-header">
+                <div id="progress-text">السؤال 1 / 26</div>
+                <div id="timer-display" class="timer">00:00</div>
+            </div>
+            
+            <div id="questions-container">
+                <!-- Dynamic Questions Inject Here -->
+            </div>
+
+            <div class="controls" id="quiz-controls">
+                <button class="btn" id="prev-btn" onclick="navigate(-1)">السابق</button>
+                <button class="btn btn-success" id="submit-btn" onclick="finishQuiz()">إنهاء وتسليم</button>
+                <button class="btn" id="next-btn" onclick="navigate(1)">التالي</button>
+            </div>
+        </div>
+
+        <!-- Result Screen -->
+        <div id="result-screen" class="setup-card">
+            <h2>النتيجة النهائية</h2>
+            <div class="score-circle" id="score-display">0%</div>
+            <h3 id="score-text">أجبت بشكل صحيح على 0 من 26</h3>
+            <p id="time-taken-text"></p>
+            <div style="margin-top: 30px;">
+                <button class="btn" onclick="reviewAnswers()">مراجعة كامل الإجابات</button>
+                <button class="btn btn-success" onclick="location.reload()">إعادة الاختبار</button>
+            </div>
+        </div>
+
+    </div>
+
+    <div class="footer-attribution">
+        Made with <span>♥</span> by : AMER ALSHARIF
+    </div>
+
+    <script>
+        // Database of Questions
+        const rawQuestions = [
+            { q: "تعاني فئة من تهميش يمنعها من المشاركة في أنشطة المجتمع والاستفادة من موارده. أي مفهوم يصف هذا العامل المؤثر في صحتها؟", opts: [{t:"الحياة المبكرة.", c:false}, {t:"الاستبعاد الاجتماعي.", c:true}, {t:"التدرج الاجتماعي.", c:false}, {t:"الدعم الاجتماعي.", c:false}] },
+            { q: "أظهرت متابعة برنامج صحي جامعي أن الطلاب يعرفون فوائد النشاط البدني، لكنهم يجدون صعوبة في إدخاله ضمن جدولهم الدراسي. أي أسلوب تثقيفي أنسب لمعالجة هذه الصعوبة؟", opts: [{t:"تنظيم نقاش جماعي حول فوائد النشاط البدني.", c:false}, {t:"إقامة مسابقة جماعية حول توصيات النشاط البدني.", c:false}, {t:"عرض ملصقات عن أنواع النشاط البدني.", c:false}, {t:"تنظيم ورشة عمل عن إدماج النشاط البدني في اليوم الدراسي.", c:true}] },
+            { q: "يُدخل لقاح مادة وراثية لتحفيز خلايا الجسم على إنتاج بروتين، بينما يقدم لقاح آخر بروتيناً منتقى من الميكروب مباشرة. ما التصنيف الصحيح للقاحين، على الترتيب؟", opts: [{t:"اللقاح الأول جيني، واللقاح الثاني معطل.", c:false}, {t:"اللقاح الأول بروتيني، واللقاح الثاني جيني.", c:false}, {t:"اللقاح الأول جيني، واللقاح الثاني بروتيني.", c:true}, {t:"اللقاح الأول مقترن، واللقاح الثاني بروتيني.", c:false}] },
+            { q: "كيف يؤدي نقص إنتاج الهيموجلوبين في الثلاسيميا إلى التعب والضعف؟", opts: [{t:"انخفاض قدرة الدم على نقل الأكسجين.", c:true}, {t:"انخفاض قدرة الدم على تكوين الجلطات.", c:false}, {t:"زيادة قدرة الخلايا على إنتاج الإنسولين.", c:false}, {t:"زيادة قدرة المناعة على مهاجمة الأنسجة.", c:false}] },
+            { q: "يعتقد رجل كبير في السن ومصاب بالسكري أن التحصينات مهمة للأطفال، ولا يرى ارتباطها بحالته الصحية. أي رسالة أنسب لإقناعه بلقاح الإنفلونزا الموسمية؟", opts: [{t:"شرح دور التحصين في تقليل تكلفة العلاج.", c:false}, {t:"شرح دور التحصين في الحد من الانتشار.", c:false}, {t:"توضيح استهداف التحصين للفئات الأكثر عرضة للمضاعفات.", c:true}, {t:"توضيح أهمية تكرار لقاح الإنفلونزا كل موسم.", c:false}] },
+            { q: "أي إجراء يمثل تطويراً للسياسات الصحية؟", opts: [{t:"تنظيم ورش مدرسية لتعريف الطلاب بأضرار التدخين.", c:false}, {t:"توفير استشارات طبية لمساعدة المدخنين على الإقلاع.", c:false}, {t:"إجراء مسح لتحديد انتشار التدخين بين السكان.", c:false}, {t:"سن تشريعات تحد من التدخين بالأماكن العامة.", c:true}] },
+            { q: "يقدم برنامج صحي الفحوص الطبية الدورية وبرامج إعادة التأهيل، ويقدم برنامج آخر التطعيمات والفحوص الطبية الدورية. أي إضافة للبرنامج الأول ثم للبرنامج الثاني، على الترتيب، تجعل كلاً منهما يغطي مستويات الوقاية الثلاثة؟", opts: [{t:"الاكتشاف المبكر للأمراض؛ برامج إعادة التأهيل.", c:false}, {t:"التغذية السليمة؛ برامج إعادة التأهيل.", c:true}, {t:"الاكتشاف المبكر للأمراض؛ الاكتشاف المبكر للأمراض.", c:false}, {t:"التغذية السليمة؛ الاكتشاف المبكر للأمراض.", c:false}] },
+            { q: "أظهر وصف لمجتمع افتراضي أن الفئات الأقل دخلاً وتعلماً أسوأ صحة، رغم توافر العيادات للجميع. ما الاستنتاج الأدق عند تقييم احتياجات هذا المجتمع؟", opts: [{t:"التفاوت يرجح دور المحددات الاجتماعية.", c:true}, {t:"التفاوت يرجح ضعف التجهيزات العلاجية.", c:false}, {t:"التفاوت يرجح أثر المحددات الوراثية.", c:false}, {t:"التفاوت يرجح أثر التلوث البيئي.", c:false}] },
+            { q: "عند التخطيط للخدمات في مجتمع تزداد فيه نسبة كبار السن، أي احتياج يتوقع أن تزداد أهميته تبعاً لهذا التغير؟", opts: [{t:"متابعة نمو الأطفال وتطعيماتهم في المدارس.", c:false}, {t:"فحص المقبلين على الزواج وتقديم المشورة.", c:false}, {t:"توفير الرعاية للحالات المرضية الحادة والطارئة.", c:false}, {t:"متابعة الأمراض المزمنة وخدمات دعم الإعاقة.", c:true}] },
+            { q: "أي نتيجة تمثل فائدة اقتصادية لتحسن صحة المجتمع؟", opts: [{t:"ارتفاع الإنتاجية وانخفاض تكاليف الرعاية الصحية.", c:true}, {t:"زيادة الإنفاق على علاج مضاعفات الأمراض.", c:false}, {t:"زيادة الحاجة إلى خدمات التأهيل الطبي.", c:false}, {t:"ارتفاع الطلب على رعاية الحالات المزمنة.", c:false}] },
+            { q: "يتردد سكان في إجراء الفحص الدوري المتاح مجاناً؛ بعضهم يعتقد أن غياب الأعراض يلغي فائدته، وبعضهم يخشى معرفة النتيجة ويظن أن العلاج لا يستفيد من اكتشاف المرض مبكراً. أي رسالة تصحح الاعتقادين؟", opts: [{t:"الفحص المجاني يحدد العلاج المناسب بعد ظهور الأعراض، ويساعد على بدء المتابعة الطبية.", c:false}, {t:"الفحص المجاني يكشف المرض قبل ظهور الأعراض، ويتوافر دون تكلفة في المراكز الصحية.", c:false}, {t:"الفحص المجاني يكشف المرض قبل ظهور الأعراض، ويزيد الكشف المبكر فرص العلاج الفعال.", c:true}, {t:"الفحص المجاني يطمئن الشخص عند غياب الأعراض، ويغني عن الفحوص الوقائية في المستقبل.", c:false}] },
+            { q: "هيأ طالب غرفة هادئة ومظلمة، والتزم بمواعيد ثابتة للنوم والاستيقاظ، لكن نومه ما زال مضطرباً. أي تعديل يستكمل خطته وفق عادات تحسين النوم؟", opts: [{t:"زيادة تعتيم الغرفة عند موعد النوم.", c:false}, {t:"إعادة تأكيد موعد النوم الثابت يومياً.", c:false}, {t:"خفض الأصوات المحيطة بالغرفة وقت النوم.", c:false}, {t:"الابتعاد عن الشاشات قبل النوم بساعة.", c:true}] },
+            { q: "أي مقارنة تميز الخلل في الربو عن الخلل في تصلب الشرايين؟", opts: [{t:"الربو: التهاب الشعب الهوائية وتضيقها؛ تصلب الشرايين: نقص إنتاج الهيموجلوبين.", c:false}, {t:"الربو: تراكم الدهون داخل الشرايين؛ تصلب الشرايين: التهاب الشعب الهوائية وتضيقها.", c:false}, {t:"الربو: نقص إنتاج الهيموجلوبين؛ تصلب الشرايين: تراكم الدهون داخل الشرايين.", c:false}, {t:"الربو: التهاب الشعب الهوائية وتضيقها؛ تصلب الشرايين: تراكم الدهون داخل الشرايين.", c:true}] },
+            { q: "كشفت زيارة للفحص الدوري أن شخصاً قليل الحركة ويتبع نظاماً غذائياً غير صحي. اكتفى الفريق بتسليمه نتائج الفحوص. أي إضافة تستكمل الدور الوقائي للزيارة؟", opts: [{t:"شرح الأجهزة المستخدمة في إجراء الفحوص الطبية.", c:false}, {t:"توضيح مواعيد صدور نتائج التحاليل الطبية المقبلة.", c:false}, {t:"تقديم إرشادات لتعديل الغذاء وزيادة النشاط البدني.", c:true}, {t:"تحديد موعد لإعادة الفحوص ومقارنة نتائجها بالنتائج الحالية.", c:false}] },
+            { q: "تقيّم عيادة خطة لمرضى الربو تعتبر تحسن الأعراض شفاءً، وتنهي المتابعة عند ذلك. أي توصية بشأن تفسير التحسن والمتابعة تتفق مع طبيعة المرض؟", opts: [{t:"اعتبار التحسن شفاءً؛ مع استمرار المتابعة وتجنب المسببات.", c:false}, {t:"اعتبار التحسن سيطرةً على الأعراض؛ مع استمرار المتابعة وتجنب المسببات.", c:true}, {t:"اعتبار التحسن سيطرةً على الأعراض؛ مع إنهاء المتابعة بعد التحسن.", c:false}, {t:"اعتبار التحسن شفاءً؛ مع إنهاء المتابعة بعد التحسن.", c:false}] },
+            { q: "قال مقبل على الزواج < لا أشكو من أعراض، لذلك لا أرى فائدة للفحص>. أي محور للشرح يعالج سبب تردده مباشرة؟", opts: [{t:"شرح طريقة حجز موعد لإجراء الفحص الطبي.", c:false}, {t:"توضيح دور الفحص في تحديد أسباب الأعراض المرضية.", c:false}, {t:"توضيح إجراءات استلام نتيجة الفحص من المركز.", c:false}, {t:"توضيح إمكانية حمل سمة المنجلي دون ظهور أعراض.", c:true}] },
+            { q: "ما الغرض الأساسي من برنامج التحصينات الوطني في المملكة؟", opts: [{t:"الوقاية من الأمراض المعدية.", c:true}, {t:"الوقاية من الإصابات الرياضية.", c:false}, {t:"متابعة علاج الأمراض الوراثية.", c:false}, {t:"تشخيص الأمراض المزمنة.", c:false}] },
+            { q: "أي طريق لانتقال العدوى يشترك فيه التهاب الكبد الفيروسي من النوعين (ب) و (ج)؟", opts: [{t:"لدغات البعوض الناقل للعدوى.", c:false}, {t:"التعرض للدم الملوث بالفيروس.", c:true}, {t:"استنشاق الهواء المحمل بالفيروس.", c:false}, {t:"تناول الطعام الملوث بالفيروس.", c:false}] },
+            { q: "ما الغرض الأساسي من التثقيف الصحي؟", opts: [{t:"تعزيز الوعي وتنمية السلوكيات الصحية.", c:true}, {t:"استعادة الحركة وتوفير الأجهزة المساعدة.", c:false}, {t:"تحديد التشخيص ووصف الأدوية المناسبة.", c:false}, {t:"قياس المعارف والعادات الصحية لدى السكان.", c:false}] },
+            { q: "قال شخص: «حفّز اللقاح مناعتي ضد المرض، وهذا يعني تحقق مناعة القطيع في مجتمعي». أي شرط يلزم قبل هذا الاستنتاج؟", opts: [{t:"استمرار الاستجابة المناعية لديه لفترة طويلة.", c:false}, {t:"استكمال الجرعات الموصى بها لهذا الشخص.", c:false}, {t:"وصول التحصين إلى نسبة كافية من المجتمع.", c:true}, {t:"تكوّن حماية لديه من مضاعفات المرض.", c:false}] },
+            { q: "تريد حملة الوصول إلى الشباب، ومساعدة المقبلين على الزواج في فهم دلالة نتائج فحوصاتهم. أي توزيع لوسائل التثقيف يناسب الهدفين، على الترتيب؟", opts: [{t:"ملصقات داخل العيادات؛ محاضرة عامة عن الفحص.", c:false}, {t:"محتوى عبر منصات التواصل؛ محاضرة عامة عن الفحص.", c:false}, {t:"محتوى عبر منصات التواصل؛ جلسات استشارية شخصية.", c:true}, {t:"ملصقات داخل العيادات؛ جلسات استشارية شخصية.", c:false}] },
+            { q: "أثناء الفحص الدوري، قيس ضغط الدم مباشرة، ثم أخذت عينة دم لقياس الكوليسترول. ما تصنيف الإجراءين، على الترتيب؟", opts: [{t:"فحص سريري؛ تحليل مخبري.", c:true}, {t:"تحليل مخبري؛ فحص سريري.", c:false}, {t:"تاريخ طبي؛ تحليل مخبري.", c:false}, {t:"فحص سريري؛ تاريخ طبي.", c:false}] },
+            { q: "تهدف مبادرة إلى اتاحة معلومات السعرات للمستهلك وهو يقارن المنتجات الغذائية أمامه عند الشراء. أي وسيلة تثقيفية تحقق هذا الهدف بصورة مباشرة؟", opts: [{t:"تقديم محاضرات غذائية بالمراكز المجتمعية.", c:false}, {t:"نشر مقالات غذائية بالصحف المحلية.", c:false}, {t:"بث لقاءات تثقيفية بالبرامج الإذاعية.", c:false}, {t:"وضع ملصقات غذائية على المنتجات.", c:true}] },
+            { q: "الجهود المشتركة بين الحكومة والقطاع الخاص والمجتمع المدني لتحسين الصحة تسمى:", opts: [{t:"التعاون بين مختلف القطاعات.", c:true}, {t:"رعاية المرضى في المجتمع.", c:false}, {t:"الكشف المبكر عن الامراض.", c:false}, {t:"التأهيل الطبي لذوي الإعاقة.", c:false}] },
+            { q: "ما العلاقة الصحيحة بين اللقاح والتحصين؟", opts: [{t:"اللقاح عملية شاملة، والتحصين مادة تُعطى للجسم.", c:false}, {t:"اللقاح مادة تُعطى، والتحصين عملية تشمل إعطاءها.", c:true}, {t:"اللقاح للكشف عن المرض، والتحصين للوقاية منه.", c:false}, {t:"اللقاح لعلاج المصاب، والتحصين لحماية غير المصاب.", c:false}] },
+            { q: "تعدّ حملة رسالة عن الصحة النفسية، وتريد أن تتجاوز التعريف بأهميتها إلى تشجيع ممارسة يومية تدعمها. أي رسالة أنسب لهذا الهدف؟", opts: [{t:"خصّص وقتًا للاسترخاء والتأمل ضمن روتينك اليومي.", c:true}, {t:"تعرّف على تأثير الضغوط المستمرة في صحتك النفسية.", c:false}, {t:"اطلع على العلاقة بين الصحة النفسية والصحة البدنية.", c:false}, {t:"تابع المعلومات التي تشرح أهمية العناية بالصحة النفسية.", c:false}] }
+        ];
+
+        let questions = [];
+        let userAnswers = [];
+        let currentMode = 'single';
+        let isImmediateFeedback = false;
+        let currentIndex = 0;
+        let timerInterval;
+        let secondsElapsed = 0;
+        let timeLimit = 0; 
+
+        // Utilities
+        function shuffleArray(array) {
+            let curId = array.length;
+            while (0 !== curId) {
+                let randId = Math.floor(Math.random() * curId);
+                curId -= 1;
+                let tmp = array[curId];
+                array[curId] = array[randId];
+                array[randId] = tmp;
+            }
+            return array;
+        }
+
+        // Generate Sparks
+        function createSparks(x, y, count) {
+            for(let i = 0; i < count; i++) {
+                let spark = document.createElement('div');
+                spark.classList.add('spark');
+                document.body.appendChild(spark);
+                
+                spark.style.left = x + 'px';
+                spark.style.top = y + 'px';
+                
+                const colors = ['#f1c40f', '#e74c3c', '#3498db', '#2ecc71', '#9b59b6'];
+                spark.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+                
+                let angle = Math.random() * Math.PI * 2;
+                let velocity = 30 + Math.random() * 80;
+                let tx = Math.cos(angle) * velocity;
+                let ty = Math.sin(angle) * velocity;
+                
+                requestAnimationFrame(() => {
+                    spark.style.transform = `translate(${tx}px, ${ty}px) scale(0)`;
+                    spark.style.opacity = '0';
+                });
+                
+                setTimeout(() => spark.remove(), 600);
+            }
+        }
+
+        // On Click Sparks (Light)
+        document.addEventListener('click', function(e) {
+            if(e.target.tagName !== 'BUTTON' && e.target.tagName !== 'LI') return;
+            createSparks(e.clientX, e.clientY, 8);
+        });
+
+        // Show Central Celebration
+        function showCentralFeedback(isCorrect) {
+            const feedbackDiv = document.getElementById('central-feedback');
+            const iconDiv = document.getElementById('cf-icon');
+            const textDiv = document.getElementById('cf-text');
+
+            // Reset animation
+            feedbackDiv.classList.remove('animate');
+            void feedbackDiv.offsetWidth; // Trigger reflow to restart animation
+
+            if (isCorrect) {
+                feedbackDiv.className = 'correct-theme animate';
+                iconDiv.textContent = '✔️';
+                textDiv.textContent = 'إجابة رائعة!';
+                // Massive sparks burst from center
+                createSparks(window.innerWidth / 2, window.innerHeight / 2, 40);
+            } else {
+                feedbackDiv.className = 'wrong-theme animate';
+                iconDiv.textContent = '❌';
+                textDiv.textContent = 'إجابة خاطئة!';
+            }
+
+            // Cleanup class after animation ends
+            setTimeout(() => {
+                feedbackDiv.classList.remove('animate');
+            }, 1600);
+        }
+
+        // Initialize Quiz
+        function startQuiz() {
+            const doShuffle = document.getElementById('shuffle-mode').checked;
+            currentMode = document.getElementById('display-mode').value;
+            isImmediateFeedback = document.getElementById('immediate-feedback').checked;
+            timeLimit = parseInt(document.getElementById('timer-mode').value) * 60;
+            
+            // Deep copy and prepare
+            questions = JSON.parse(JSON.stringify(rawQuestions));
+            
+            if (doShuffle) {
+                shuffleArray(questions);
+                questions.forEach(q => shuffleArray(q.opts));
+            }
+            
+            userAnswers = new Array(questions.length).fill(null);
+            
+            document.getElementById('setup-screen').style.display = 'none';
+            document.getElementById('quiz-screen').style.display = 'block';
+            
+            buildQuizDOM();
+            startTimer();
+            updateUI();
+        }
+
+        function buildQuizDOM() {
+            const container = document.getElementById('questions-container');
+            container.innerHTML = '';
+            
+            questions.forEach((q, qIndex) => {
+                let card = document.createElement('div');
+                card.className = `question-card ${currentMode === 'list' ? 'active' : ''}`;
+                card.id = `q-card-${qIndex}`;
+                
+                let qText = document.createElement('div');
+                qText.className = 'question-text';
+                qText.textContent = `${qIndex + 1}. ${q.q}`;
+                card.appendChild(qText);
+                
+                let ul = document.createElement('ul');
+                ul.className = 'options-list';
+                ul.id = `opts-list-${qIndex}`;
+                
+                q.opts.forEach((opt, optIndex) => {
+                    let li = document.createElement('li');
+                    li.className = 'option-item';
+                    li.textContent = opt.t;
+                    li.onclick = () => selectOption(qIndex, optIndex, li);
+                    ul.appendChild(li);
+                });
+                
+                card.appendChild(ul);
+                container.appendChild(card);
+            });
+        }
+
+        function selectOption(qIndex, optIndex, liElement) {
+            // Prevent changing answer if immediate feedback is on and already answered
+            if (isImmediateFeedback && userAnswers[qIndex] !== null) return;
+
+            const ul = liElement.parentElement;
+            const siblings = ul.children;
+
+            // Remove selection from siblings
+            for(let i=0; i<siblings.length; i++) {
+                siblings[i].classList.remove('selected');
+            }
+            
+            // Select current
+            liElement.classList.add('selected');
+            userAnswers[qIndex] = optIndex;
+
+            // Apply immediate feedback logic
+            if (isImmediateFeedback) {
+                ul.style.pointerEvents = 'none'; // Disable further clicks
+                
+                const isCorrect = questions[qIndex].opts[optIndex].c;
+                
+                // Trigger Central Pop Animation
+                showCentralFeedback(isCorrect);
+
+                if (isCorrect) {
+                    liElement.classList.add('correct-ans');
+                    liElement.innerHTML += ' <span class="feedback-badge" style="color:#2e7d32;">✓ إجابة صحيحة</span>';
+                } else {
+                    liElement.classList.add('wrong-ans');
+                    liElement.innerHTML += ' <span class="feedback-badge" style="color:#c62828;">✗ إجابة خاطئة</span>';
+                    
+                    // Highlight the actual correct answer
+                    for(let i=0; i<siblings.length; i++) {
+                        if (questions[qIndex].opts[i].c) {
+                            siblings[i].classList.add('correct-ans');
+                            siblings[i].innerHTML += ' <span class="feedback-badge" style="color:#2e7d32;">✓ الإجابة الصحيحة</span>';
+                        }
+                    }
+                }
+            }
+        }
+
+        function navigate(dir) {
+            document.getElementById(`q-card-${currentIndex}`).classList.remove('active');
+            currentIndex += dir;
+            updateUI();
+        }
+
+        function updateUI() {
+            if (currentMode === 'single') {
+                document.getElementById(`q-card-${currentIndex}`).classList.add('active');
+                document.getElementById('prev-btn').disabled = (currentIndex === 0);
+                document.getElementById('next-btn').style.display = (currentIndex === questions.length - 1) ? 'none' : 'inline-block';
+                document.getElementById('submit-btn').style.display = (currentIndex === questions.length - 1) ? 'inline-block' : 'none';
+                document.getElementById('progress-text').textContent = `السؤال ${currentIndex + 1} / ${questions.length}`;
+            } else {
+                document.getElementById('prev-btn').style.display = 'none';
+                document.getElementById('next-btn').style.display = 'none';
+                document.getElementById('submit-btn').style.display = 'inline-block';
+                document.getElementById('progress-text').textContent = `الأسئلة: ${questions.length}`;
+            }
+        }
+
+        // Timer Logic
+        function startTimer() {
+            const display = document.getElementById('timer-display');
+            timerInterval = setInterval(() => {
+                if (timeLimit > 0) {
+                    let rem = timeLimit - secondsElapsed;
+                    if (rem <= 0) {
+                        clearInterval(timerInterval);
+                        finishQuiz();
+                        return;
+                    }
+                    display.textContent = formatTime(rem);
+                } else {
+                    display.textContent = formatTime(secondsElapsed);
+                }
+                secondsElapsed++;
+            }, 1000);
+        }
+
+        function formatTime(totalSeconds) {
+            let m = Math.floor(totalSeconds / 60).toString().padStart(2, '0');
+            let s = (totalSeconds % 60).toString().padStart(2, '0');
+            return `${m}:${s}`;
+        }
+
+        // Finish and Score
+        function finishQuiz() {
+            clearInterval(timerInterval);
+            document.getElementById('quiz-screen').style.display = 'none';
+            document.getElementById('result-screen').style.display = 'block';
+            
+            let score = 0;
+            questions.forEach((q, idx) => {
+                let uAns = userAnswers[idx];
+                if (uAns !== null && q.opts[uAns].c) {
+                    score++;
+                }
+            });
+            
+            let percentage = Math.round((score / questions.length) * 100);
+            document.getElementById('score-display').textContent = `${percentage}%`;
+            document.getElementById('score-text').textContent = `أجبت بشكل صحيح على ${score} من ${questions.length}`;
+            
+            let timeStr = timeLimit > 0 ? formatTime(secondsElapsed) : formatTime(secondsElapsed);
+            document.getElementById('time-taken-text').textContent = `الوقت المستغرق: ${timeStr}`;
+        }
+
+        // Review Answers Mode
+        function reviewAnswers() {
+            document.getElementById('result-screen').style.display = 'none';
+            document.getElementById('quiz-screen').style.display = 'block';
+            
+            currentMode = 'list';
+            document.getElementById('quiz-controls').style.display = 'none';
+            document.getElementById('timer-display').style.display = 'none';
+            document.getElementById('progress-text').textContent = "مراجعة الإجابات";
+            
+            const cards = document.querySelectorAll('.question-card');
+            cards.forEach(card => card.classList.add('active'));
+
+            questions.forEach((q, qIndex) => {
+                let ul = document.getElementById(`opts-list-${qIndex}`);
+                let items = ul.children;
+                
+                ul.style.pointerEvents = 'none';
+
+                if (!isImmediateFeedback) {
+                    for(let i=0; i<items.length; i++) {
+                        items[i].classList.remove('selected');
+                        
+                        if (q.opts[i].c) {
+                            items[i].classList.add('correct-ans');
+                            items[i].innerHTML += ' <span class="feedback-badge" style="color:#2e7d32;">✓ إجابة صحيحة</span>';
+                        } else if (userAnswers[qIndex] === i) {
+                            items[i].classList.add('wrong-ans');
+                            items[i].innerHTML += ' <span class="feedback-badge" style="color:#c62828;">✗ إجابتك</span>';
+                        }
+                    }
+                }
+            });
+        }
+    </script>
+</body>
+</html>
